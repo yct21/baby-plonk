@@ -5,6 +5,7 @@ from compiler.program import CommonPreprocessedInput
 from verifier import VerificationKey
 from dataclasses import dataclass
 from poly import Polynomial, Basis
+from itertools import accumulate
 
 @dataclass
 class Setup(object):
@@ -21,7 +22,6 @@ class Setup(object):
         print("Start to generate structured reference string")
 
         # Initialize powers_of_x with 0 values
-        powers_of_x = [0] * powers
         # powers_of_x[0] =  b.G1 * tau**0 = b.G1
         # powers_of_x[1] =  b.G1 * tau**1 = powers_of_x[0] * tau
         # powers_of_x[2] =  b.G1 * tau**2 = powers_of_x[1] * tau
@@ -29,6 +29,7 @@ class Setup(object):
         # powers_of_x[i] =  b.G1 * tau**i = powers_of_x[i - 1] * tau
         # TODO: generate powers_of_x
         # reference: https://github.com/sec-bit/learning-zkp/blob/master/plonk-intro-cn/5-plonk-polycom.md
+        powers_of_x = list(accumulate(range(1, powers), lambda acc, _: b.multiply(acc, tau), initial=b.G1))
 
         print("Generated G1 side, X^1 point: {}".format(powers_of_x[1]))
 
