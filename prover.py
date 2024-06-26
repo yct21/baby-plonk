@@ -240,7 +240,18 @@ class Prover:
         # construct gate constraints polynomial in coefficient form
         # reference: https://github.com/sec-bit/learning-zkp/blob/master/plonk-intro-cn/4-plonk-constraints.md
         gate_constraints_coeff = (
-            # TODO: your code
+            # qL * ωa
+            QL_coeff * A_coeff
+            # qR * ωb
+            + QR_coeff * B_coeff
+            # qM * ωa * ωb
+            + QM_coeff * A_coeff * B_coeff
+            # qO * ωc
+            + QO_coeff * C_coeff
+            # qC
+            + QC_coeff
+            # public input
+            + PI_coeff
         )
 
         normal_roots = Polynomial(
@@ -267,8 +278,30 @@ class Prover:
 
         # construct permutation polynomial
         # reference: https://github.com/sec-bit/learning-zkp/blob/master/plonk-intro-cn/3-plonk-permutation.md
+
+        # verifier:
+        # f_eval = (
+        #     (a_eval + beta * zeta + gamma)
+        #     * (b_eval + beta * zeta * 2 + gamma)
+        #     * (c_eval + beta * zeta * 3 + gamma)
+        # )
+        # permutation_grand_product_eval = z_eval * f_eval - zw_eval * g_eval
+
         permutation_grand_product_coeff = (
-            # TODO: your code
+            (
+                self.rlc(A_coeff, roots_coeff)
+                * self.rlc(B_coeff, roots_coeff * Scalar(2))
+                * self.rlc(C_coeff, roots_coeff * Scalar(3))
+            )
+            # z(ζ)
+            * Z_coeff
+            - (
+                self.rlc(A_coeff, S1_coeff)
+                * self.rlc(B_coeff, S2_coeff)
+                * self.rlc(C_coeff, S3_coeff)
+            )
+            # z(ω*ζ)
+            * ZW_coeff
         )
 
         permutation_first_row_coeff = (Z_coeff - Scalar(1)) * L0_coeff
